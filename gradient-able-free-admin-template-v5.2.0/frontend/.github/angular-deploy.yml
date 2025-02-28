@@ -1,0 +1,45 @@
+name: Angular Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'angular/**'
+
+jobs:
+  Angular-Deploy:
+    name: 🎉 Angular Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Install Dependencies
+        run: |
+          cd angular
+          yarn install
+
+      - name: 🔨 Build Project
+        run: |
+          cd angular
+          ng build --configuration=production
+
+      - name: List deployed files
+        run: ls -la angular/dist/
+
+      - name: 📂 Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SOURCE: "angular/dist/"
+          REMOTE_HOST: 92.112.197.121
+          REMOTE_USER: u778408432
+          REMOTE_PORT: "65002"
+          TARGET: domains/codedthemes.com/public_html/demos/admin-templates/gradient-able/angular/free
